@@ -6,4 +6,9 @@ langchain-google-genai
 google-generativeai
 python-dotenv
 faiss-cpu
+pypdf
+pytube
+youtube-transcript-api
+pymupdf
+
 
