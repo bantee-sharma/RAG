@@ -17,6 +17,7 @@ It utilizes LangChain, Google Gemini AI, FAISS, and Hugging Face Embeddings to p
 
 ✅ Google Gemini Integration – Uses Gemini 2.0 Flash for generating high-quality answers.
 
+
 🔧 Tech Stack
 Python – Core programming language
 
