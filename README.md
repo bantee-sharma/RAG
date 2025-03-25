@@ -6,6 +6,7 @@ It utilizes LangChain, Google Gemini AI, FAISS, and Hugging Face Embeddings to p
 
 
 🚀 Features
+
 ✅ PDF Upload – Upload any PDF document through a Streamlit web interface.
 
 ✅ AI-Powered Q&A – Ask questions about the PDF, and the AI will fetch relevant content to generate responses.
