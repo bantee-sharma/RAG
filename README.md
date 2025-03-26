@@ -5,7 +5,7 @@ This project is an AI-powered chatbot that allows users to upload a PDF and ask 
 It utilizes LangChain, Google Gemini AI, FAISS, and Hugging Face Embeddings to perform retrieval-augmented generation (RAG) for answering questions based on the document.
 
 
-**🚀 Features**
+**🚀 Features :**
 
 ✅ PDF Upload – Upload any PDF document through a Streamlit web interface.
 
