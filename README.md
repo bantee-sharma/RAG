@@ -18,7 +18,7 @@ It utilizes LangChain, Google Gemini AI, FAISS, and Hugging Face Embeddings to p
 
 
 **🔧 Tech Stack**
-"o" Python – Core programming language
+Python – Core programming language
 
 LangChain – For retrieval-based question answering
 
