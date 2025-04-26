@@ -1,57 +1,45 @@
-import os
-import streamlit as st
-from langchain_google_genai import GoogleGenerativeAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
-from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAI
 from dotenv import load_dotenv
+from langchain_core.prompts import PromptTemplate
+from langchain_community.document_loaders import PyPDFLoader, PyMuPDFLoader
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-# Load environment variables
 load_dotenv()
 
-# Ensure 'data' directory exists
-os.makedirs("data", exist_ok=True)
+llm = GoogleGenerativeAI(model = "gemini-2.0-flash")
 
-# Streamlit UI
-st.title("📄 AI-Powered PDF Q&A Chatbot")
-st.write("Upload a PDF and ask questions about its content.")
+loader = PyMuPDFLoader("SQL Revision Notes.pdf")
 
-# File Uploader
-uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
+docs = loader.load()
 
-if uploaded_file is not None:
-    file_path = os.path.join("data", uploaded_file.name)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500, chunk_overlap=50
+)
 
-    # Save uploaded file
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
+chunk = text_splitter.split_documents(docs)
+embedd = HuggingFaceEmbeddings()
+vector_store = FAISS.from_documents(chunk,embedd)
 
-    st.success(f"File '{uploaded_file.name}' uploaded successfully!")
+retriever = vector_store.as_retriever(search_type="similarity", kwargs={'k':3})
 
-    # Load and process PDF
-    loader = PyMuPDFLoader(file_path)
-    documents = loader.load()
+prompt = PromptTemplate(
+    template= '''You are a helpfull AI assistant.
+    Answer the question from the following context.
+    If context is insufficient just say, I don't know.
+    if anyone asked quesion in english then give answer in Englsih.
+    {context}
+    Question : {question}''',
+    input_variables=["context","question"]
+)
 
-    # Split document into smaller chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-    doc_chunks = text_splitter.split_documents(documents)
+question = "What is this documnet about?"
 
-    # Generate embeddings
-    embeddings = HuggingFaceEmbeddings()
+retriever_docs = retriever.invoke(question)
+context = " ".join([i.page_content for i in retriever_docs])
 
-    # Store in FAISS vector DB
-    db = FAISS.from_documents(doc_chunks, embeddings)
-    retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 2})
+final_prompt = prompt.invoke({"context":context,"question":question})
 
-    # Define LLM and Retrieval QA Chain
-    llm = GoogleGenerativeAI(model="gemini-2.0-flash")
-    qa_chain = RetrievalQA.from_chain_type(llm, retriever=retriever)
-
-    # User input for query
-    query = st.text_input("🔍 Ask a question about the PDF:")
-    if query:
-        response = qa_chain.run(query)
-        st.write("💡 **Answer:**", response)
+res = llm.invoke(final_prompt)
+print(res)
